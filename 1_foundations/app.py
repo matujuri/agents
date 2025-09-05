@@ -28,6 +28,11 @@ def record_user_details(email, name="Name not provided", notes="not provided"):
     return {"recorded": "ok"}
 
 
+def record_user_requirements(requirements, is_suitability):
+    push(f"Recording {requirements} with is_suitability {is_suitability}")
+    return {"recorded": "ok"}
+
+
 def record_unknown_question(question):
     push(f"Recording {question}")
     return {"recorded": "ok"}
@@ -51,6 +56,20 @@ record_user_details_json = {
     },
 }
 
+record_user_requirements_json = {
+    "name": "record_user_requirements",
+    "description": "ユーザーが職業上の要望を提供したことを記録するためのツールです",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "requirements": {"type": "string", "description": "このユーザーの職業上の要望"},
+            "is_suitability": {"type": "boolean", "description": "この要望が自身の経験と適切かどうか(true: 適切, false: 不適切)"},
+        },
+        "required": ["requirements"],
+        "additionalProperties": False,
+    },
+}
+
 record_unknown_question_json = {
     "name": "record_unknown_question",
     "description": "回答が分からず答えられなかった質問を必ず記録するためのツールです",
@@ -66,6 +85,7 @@ record_unknown_question_json = {
 
 tools = [
     {"type": "function", "function": record_user_details_json},
+    {"type": "function", "function": record_user_requirements_json},
     {"type": "function", "function": record_unknown_question_json},
 ]
 
@@ -104,7 +124,9 @@ class Me:
             "RAG により、関連情報は都度 system メッセージとして追加されます。追加コンテキストを優先的に活用し、"
             "事実はコンテキストに含まれる内容に限定してください。情報が無い場合は無理に推測せず、"
             "record_unknown_question ツールで未回答の質問を記録してください。会話が続く際は、メール連絡へ誘導し、"
-            "メールアドレスを尋ねて record_user_details ツールで記録してください。常に丁寧かつ親しみやすい日本語で回答してください。"
+            "メールアドレスを尋ねて record_user_details ツールで記録してください。"
+            "職業上の要望を尋ねて、 自身の経験と適切かどうかを確認して record_user_requirements ツールで記録してください。"
+            "常に丁寧かつ親しみやすい日本語で回答してください。"
         )
         return system_prompt
 
